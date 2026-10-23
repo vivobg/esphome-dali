@@ -195,16 +195,12 @@ void DaliBusComponent::create_light_component(short_addr_t short_addr, uint32_t 
     App.register_light(light_state);
     static_cast<AppRegistrationAccessor&>(App).register_component_(light_state);
 
-#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 10, 0)
-    // ESPHome 2026.10 replaced restore_mode with save_enabled + a boot-time state callback.
-    light_state->set_save_enabled(true);
-    light_state->set_state_callback([](light::LightStateRTCState &s, bool restored) {
-        if (!restored)
-            s.state = true;  // equivalent of LIGHT_RESTORE_DEFAULT_ON
+    // Equivalent of the former LIGHT_RESTORE_DEFAULT_ON: on by default, restored state otherwise.
+    light_state->set_state_callback([](light::LightStateRTCState& state, bool restored) {
+        if (!restored) {
+            state.state = true;
+        }
     });
-#else
-    light_state->set_restore_mode(light::LIGHT_RESTORE_DEFAULT_ON);
-#endif
     light_state->add_effects({});
 
     // Initialize the DaliLight with the LightState:
