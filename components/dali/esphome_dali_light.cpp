@@ -1,5 +1,7 @@
 
 #include <esphome.h>
+#include "esphome/core/macros.h"
+#include "esphome/core/version.h"
 #include "esphome_dali_light.h"
 #include "esphome/core/log.h"
 
@@ -113,7 +115,13 @@ void dali::DaliLight::setup_state(light::LightState *state) {
             }
 
             s_setup_instance = this;
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 10, 0)
+            state->set_state_callback([](light::LightStateRTCState &s, bool /*restored*/) {
+                DaliLight::initial_state_trampoline(s);
+            });
+#else
             state->set_initial_state(initial_state_trampoline);
+#endif
         }
         else {
             ESP_LOGW(TAG, "DALI device at addr %.2x not found!", address_);

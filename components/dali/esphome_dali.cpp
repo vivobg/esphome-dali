@@ -1,4 +1,7 @@
 #include <esphome.h>
+#include "esphome/core/macros.h"
+#include "esphome/core/version.h"
+#include <cinttypes>
 #include <esp_task_wdt.h>
 #include "esphome_dali.h"
 #include "esphome_dali_light.h"
@@ -174,7 +177,7 @@ void DaliBusComponent::create_light_component(short_addr_t short_addr, uint32_t 
     char* name = new char[MAX_STR_LEN];
     char* id = new char[MAX_STR_LEN];
     snprintf(name, MAX_STR_LEN, "DALI Light %d", short_addr);
-    snprintf(id, MAX_STR_LEN, "dali_light_%.6x", long_addr);
+    snprintf(id, MAX_STR_LEN, "dali_light_%.6" PRIx32, long_addr);
     // NOTE: Not freeing these strings, they will be owned by LightState.
 
     auto* light_state = new DynamicDaliLightState { dali_light };
@@ -184,7 +187,16 @@ void DaliBusComponent::create_light_component(short_addr_t short_addr, uint32_t 
     App.register_light(light_state);
     static_cast<AppRegistrationAccessor&>(App).register_component_(light_state);
 
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 10, 0)
+    // ESPHome 2026.10 replaced restore_mode with save_enabled + a boot-time state callback.
+    light_state->set_save_enabled(true);
+    light_state->set_state_callback([](light::LightStateRTCState &s, bool restored) {
+        if (!restored)
+            s.state = true;  // equivalent of LIGHT_RESTORE_DEFAULT_ON
+    });
+#else
     light_state->set_restore_mode(light::LIGHT_RESTORE_DEFAULT_ON);
+#endif
     light_state->add_effects({});
 
     // Initialize the DaliLight with the LightState:
