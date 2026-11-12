@@ -2,8 +2,6 @@
 #include <array>
 #include <utility>
 #include <esphome.h>
-#include "esphome/core/macros.h"
-#include "esphome/core/version.h"
 #include "esphome_dali_light.h"
 #include "esphome/core/log.h"
 

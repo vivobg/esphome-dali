@@ -1,6 +1,4 @@
 #include <esphome.h>
-#include "esphome/core/macros.h"
-#include "esphome/core/version.h"
 #include <cinttypes>
 #include <esp_task_wdt.h>
 #include <driver/gpio.h>
@@ -259,7 +257,7 @@ void DaliBusComponent::create_light_component(short_addr_t short_addr, uint32_t 
     char* id = new char[MAX_STR_LEN];
     snprintf(name, MAX_STR_LEN, "DALI Light %d", short_addr);
     if (long_addr) {
-        snprintf(id, MAX_STR_LEN, "dali_light_%.6x", long_addr);
+        snprintf(id, MAX_STR_LEN, "dali_light_%.6" PRIx32, long_addr);
     } else {
         snprintf(id, MAX_STR_LEN, "dali_light_s%.2u", short_addr);
     }
